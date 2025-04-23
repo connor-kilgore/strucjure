@@ -1,20 +1,21 @@
 {
  :paths   ["src" "resources"]
  :deps    {
-           org.clojure/clojure {:mvn/version "1.11.3"}
+           org.clojure/clojure           {:mvn/version "1.11.3"}
            io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}
-           org.clojure/tools.cli {:mvn/version "1.1.230"}
+           org.clojure/tools.cli         {:mvn/version "1.1.230"}
+           com.cleancoders.c3kit/apron   {:mvn/version "2.1.4"}
            }
  :aliases {
            ;:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}}
-           :test  {:extra-deps  {speclj/speclj {:mvn/version "3.4.8"}}
-                   :extra-paths ["dev" "spec"]}
-           :spec  {:main-opts ["-m" "speclj.main" "-c"]}
+           :test {:extra-deps  {speclj/speclj {:mvn/version "3.4.8"}}
+                  :extra-paths ["dev" "spec"]}
+           :spec {:main-opts ["-m" "speclj.main" "-c"]}
            :build-native
-           {:extra-deps {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}
+           {:extra-deps  {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}
             :extra-paths ["src"]
-            :ns-default strucjure.build.build-native
-            :exec-fn build
+            :ns-default  strucjure.build.build-native
+            :exec-fn     build
             }
            }
  }

@@ -36,7 +36,7 @@
                                                  :ns-compile ['strucjure.build.build-native-spec]
                                                  :class-dir  opts/class-dir}]})
       (should-have-invoked :uber {:with [{:class-dir opts/class-dir
-                                          :uber-file @opts/uber-file
+                                          :uber-file (str @opts/target ".jar")
                                           :basis @sut/basis
                                           :main 'strucjure.build.build-native-spec}]})))
   )

@@ -1,13 +1,14 @@
 (ns strucjure.build.options)
 
 (def class-dir "target/classes")
-(def uber-file (atom "target/output.jar"))
+(def target (atom "target/output"))
+;(def uber-file (atom "target/output.jar"))
 (def main-ns (atom nil))
 
 (defn set-uber! [args]
   (cond
-    (some? (get args '-t)) (reset! uber-file (str (get args '-t)))
-    (some? (get args '--target)) (reset! uber-file (str (get args '--target)))))
+    (some? (get args '-t)) (reset! target (str (get args '-t)))
+    (some? (get args '--target)) (reset! target (str (get args '--target)))))
 
 (defn -get-ns-sym [args]
   (cond
