@@ -9,8 +9,8 @@
   (b/delete {:path "target"})
   (b/delete {:path ".cpcache"}))
 
-(defn uber [main-ns]
-  (b/copy-dir {:src-dirs ["src" "resources"]
+(defn aot-compile [main-ns]
+  (b/copy-dir {:src-dirs   ["src" "resources"]
                :target-dir opts/class-dir})
 
   (println "Creating uber jar...")
@@ -28,13 +28,19 @@
 (defn native []
   ; TODO: babashka
   (println (str "Building native executable"))
-  (sh/sh "native-image" "--report-unsupported-elements-at-runtime"
-         "--initialize-at-build-time" "--no-server" "-jar"
-         (str @opts/target ".jar")
-         (str "-H:Name=" @opts/target)))
+  (b/process {:command-args
+              ["native-image" "--verbose" "--report-unsupported-elements-at-runtime"
+               "--initialize-at-build-time" "--no-server" "-jar"
+               "-march=compatibility"
+               (str @opts/target ".jar")
+               (str "-H:Name=" @opts/target)] :inherit true})
+  #_(sh/sh "native-image" "--verbose" "--report-unsupported-elements-at-runtime"
+           "--initialize-at-build-time" "--no-server" "-jar"
+           (str @opts/target ".jar")
+           (str "-H:Name=" @opts/target)))
 
 (defn build [args]
   (opts/set-options! args)
   (clean nil)
-  (uber @opts/main-ns)
+  (aot-compile @opts/main-ns)
   (native))

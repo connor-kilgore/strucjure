@@ -12,10 +12,14 @@
                   :extra-paths ["dev" "spec"]}
            :spec {:main-opts ["-m" "speclj.main" "-c"]}
            :build-native
-           {:extra-deps  {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}
-            :extra-paths ["src"]
+           {:exec-fn     strucjure.build.build-native/build
             :ns-default  strucjure.build.build-native
-            :exec-fn     build
-            }
+            :extra-deps  {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}
+            :extra-paths ["src"]}
+           ;{:extra-deps  {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}
+           ; :extra-paths ["src"]
+           ; :ns-default  strucjure.build.build-native
+           ; :exec-fn     build
+           ; }
            }
  }

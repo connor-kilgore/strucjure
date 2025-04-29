@@ -24,14 +24,14 @@
                     require (stub :require)
                     sut/clean (stub :clean)])
     (it "converts string to a namespace"
-      (sut/uber 'strucjure.build.build-native-spec)
+      (sut/aot-compile 'strucjure.build.build-native-spec)
       (should-have-invoked :require {:with ['strucjure.build.build-native-spec]}))
 
     (it "throws an exception if unknown namespace"
-      (should-throw (sut/uber 'blah.main)))
+      (should-throw (sut/aot-compile 'blah.main)))
 
     (it "with ns"
-      (sut/uber 'strucjure.build.build-native-spec)
+      (sut/aot-compile 'strucjure.build.build-native-spec)
       (should-have-invoked :compile-clj {:with [{:basis      @sut/basis
                                                  :ns-compile ['strucjure.build.build-native-spec]
                                                  :class-dir  opts/class-dir}]})
