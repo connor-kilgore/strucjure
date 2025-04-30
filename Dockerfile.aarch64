@@ -1,0 +1,18 @@
+FROM arm64v8/debian:bullseye
+WORKDIR /app
+COPY src /app/src
+COPY deps.edn /app/
+COPY bin /app/bin
+RUN apt-get update && apt-get install -y curl zip unzip git build-essential libz-dev zlib1g-dev gnupg ca-certificates
+ARG BUILD_TARGET=output
+ENV BUILD_TARGET=$BUILD_TARGET
+ARG MAIN_NS=main
+ENV MAIN_NS=$MAIN_NS
+ENV SDKMAN_DIR="/root/.sdkman"
+ENV PATH="${SDKMAN_DIR}/candidates/java/current/bin:$PATH"
+RUN curl -L -O https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh && \
+chmod +x linux-install.sh && \
+./linux-install.sh && \
+rm linux-install.sh
+CMD clojure -T:build-native build -t $BUILD_TARGET -ns $MAIN_NS && \
+mv $BUILD_TARGET /app/output/

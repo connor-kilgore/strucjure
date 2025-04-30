@@ -12,7 +12,7 @@
                   :extra-paths ["dev" "spec"]}
            :spec {:main-opts ["-m" "speclj.main" "-c"]}
            :build-native
-           {:exec-fn     strucjure.build.build-native/build
+           {:exec-fn     strucjure.build.build-native/build-aarch64
             :ns-default  strucjure.build.build-native
             :extra-deps  {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}
             :extra-paths ["src"]}

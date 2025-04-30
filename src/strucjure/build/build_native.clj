@@ -26,21 +26,63 @@
   (println (str "Uber jar '" @opts/target ".jar' created.")))
 
 (defn native []
-  ; TODO: babashka
-  (println (str "Building native executable"))
+  ; TODO: babashka?
   (b/process {:command-args
               ["native-image" "--verbose" "--report-unsupported-elements-at-runtime"
-               "--initialize-at-build-time" "--no-server" "-jar"
-               "-march=compatibility"
+               "-march=compatibility" "--initialize-at-build-time" "--no-server" "-jar"
                (str @opts/target ".jar")
-               (str "-H:Name=" @opts/target)] :inherit true})
-  #_(sh/sh "native-image" "--verbose" "--report-unsupported-elements-at-runtime"
-           "--initialize-at-build-time" "--no-server" "-jar"
-           (str @opts/target ".jar")
-           (str "-H:Name=" @opts/target)))
+               (str "-H:Name=" @opts/target)] :inherit true}))
+
+(defn write-dockerfile! [_]
+  (spit "Dockerfile.aarch64"
+    (apply str
+      (interpose "\n"
+        ["FROM arm64v8/debian:bullseye"
+         "WORKDIR /app"
+         "COPY src /app/src"
+         "COPY deps.edn /app/"
+         "RUN apt-get update && apt-get install -y curl zip unzip git build-essential libz-dev zlib1g-dev gnupg ca-certificates"
+         "ARG BUILD_TARGET=output"
+         "ENV BUILD_TARGET=$BUILD_TARGET"
+         "ARG MAIN_NS=main"
+         "ENV MAIN_NS=$MAIN_NS"
+         "ENV SDKMAN_DIR=\"/root/.sdkman\""
+         "ENV PATH=\"${SDKMAN_DIR}/candidates/java/current/bin:$PATH\""
+         "RUN curl -s \"https://get.sdkman.io\" | bash && \\"
+         "bash -c \"source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 24-graal\""
+         "RUN curl -L -O https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh && \\"
+         "chmod +x linux-install.sh && \\"
+         "./linux-install.sh && \\"
+         "rm linux-install.sh"
+         "CMD clojure -T:build-native build -t $BUILD_TARGET -ns $MAIN_NS && \\"
+         "mv $BUILD_TARGET /app/output/"]))))
+
+(defn docker []
+  (let [cwd (System/getProperty "user.dir")]
+    (write-dockerfile! nil)
+    ; TODO: parameterize the Dockerfile to choose which platform to build native image on
+    (println "Building Docker image")
+    (b/process {:command-args
+                ["docker" "build"
+                 "--build-arg" (str "BUILD_TARGET=" @opts/target)
+                 "--build-arg" (str "MAIN_NS=" @opts/main-ns)
+                 "-f" "Dockerfile.aarch64"
+                 "-t" "strucjure-builder" "."]})
+    (println "Running Docker container")
+    (b/process {:command-args
+                ["docker" "run"
+                 "-v" (str cwd "/output:/app/output")
+                 "strucjure-builder"]}))
+  )
 
 (defn build [args]
-  (opts/set-options! args)
+  (opts/set-options! args false)
   (clean nil)
   (aot-compile @opts/main-ns)
   (native))
+
+(defn build-aarch64 [args]
+  (opts/set-options! args true)
+  (clean nil)
+  (aot-compile @opts/main-ns)
+  (docker))

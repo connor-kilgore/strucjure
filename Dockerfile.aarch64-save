@@ -1,0 +1,37 @@
+FROM arm64v8/debian:bullseye
+
+# Set working directory
+WORKDIR /app
+
+# Copy your project files
+COPY src /app/src
+COPY deps.edn /app/
+COPY bin /app/bin
+
+# Install dependencies
+RUN apt-get update && apt-get install -y \
+    curl zip unzip git build-essential libz-dev zlib1g-dev \
+    gnupg ca-certificates
+
+# Set args
+ARG BUILD_TARGET=output
+ENV BUILD_TARGET=$BUILD_TARGET
+ARG MAIN_NS=main
+ENV MAIN_NS=$MAIN_NS
+
+# Set up SDKMAN environment
+ENV SDKMAN_DIR="/root/.sdkman"
+ENV PATH="${SDKMAN_DIR}/candidates/java/current/bin:$PATH"
+
+# Install SDKMAN & GraalVM
+RUN curl -s "https://get.sdkman.io" | bash && \
+    bash -c "source $SDKMAN_DIR/bin/sdkman-init.sh && sdk install java 24-graal"
+
+# Install Clojure CLI
+RUN curl -L -O https://github.com/clojure/brew-install/releases/latest/download/linux-install.sh && \
+    chmod +x linux-install.sh && \
+    ./linux-install.sh && \
+    rm linux-install.sh
+
+CMD clojure -T:build-native build -t $BUILD_TARGET -ns $MAIN_NS && \
+    mv $BUILD_TARGET /app/output/

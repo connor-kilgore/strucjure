@@ -9,16 +9,22 @@
       (reset! sut/target "target/output"))
 
     (it "with -t"
-      (sut/set-uber! {'-t "my-uber"})
+      (sut/set-uber! {'-t "my-uber"} false)
       (should= "my-uber" @sut/target))
 
     (it "with --target"
-      (sut/set-uber! {'--target "target/my-uber"})
+      (sut/set-uber! {'--target "target/my-uber"} false)
       (should= "target/my-uber" @sut/target))
 
     (it "no supplied args"
-      (sut/set-uber! {'-blah "target"})
-      (should= "target/output" @sut/target)))
+      (sut/set-uber! {'-blah "target"} false)
+      (should= "target/output" @sut/target))
+
+    (it "add target dir"
+      (sut/set-uber! {'-t "my-uber"} true)
+      (should= "target/my-uber" @sut/target))
+
+    )
 
   (context "set-main-ns"
     (before
