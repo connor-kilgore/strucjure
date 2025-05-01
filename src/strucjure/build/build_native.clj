@@ -26,12 +26,20 @@
   (println (str "Uber jar '" @opts/target ".jar' created.")))
 
 (defn native []
-  ; TODO: babashka?
-  (b/process {:command-args
-              ["native-image" "--verbose" "--report-unsupported-elements-at-runtime"
-               "-march=compatibility" "--initialize-at-build-time" "--no-server" "-jar"
-               (str @opts/target ".jar")
-               (str "-H:Name=" @opts/target)] :inherit true}))
+  (b/process
+    {:command-args
+     ["native-image"
+      "--verbose"
+      "--report-unsupported-elements-at-runtime"
+      "-march=compatibility"
+      "--initialize-at-build-time"
+      "--no-server"
+      "--enable-all-security-services"
+      "--enable-native-access=all-unsafe"
+      "--jni"
+      "-jar" (str @opts/target ".jar")
+      (str "-H:Name=" @opts/target)]
+     :inherit true}))
 
 (defn write-dockerfile! [_]
   (spit "Dockerfile.aarch64"
