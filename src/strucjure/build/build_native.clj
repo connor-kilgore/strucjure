@@ -30,12 +30,11 @@
     {:command-args
      ["native-image"
       "--verbose"
-      "--report-unsupported-elements-at-runtime"
       "-march=compatibility"
       "--initialize-at-build-time"
       "--no-server"
-      "--enable-all-security-services"
-      "--enable-native-access=all-unsafe"
+      "--initialize-at-run-time=io.helins.linux.io.LinuxIO"
+      ;"-H:+UnlockExperimentalVMOptions"
       "--jni"
       "-jar" (str @opts/target ".jar")
       (str "-H:Name=" @opts/target)]
