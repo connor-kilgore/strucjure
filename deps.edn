@@ -5,7 +5,9 @@
            io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}
            org.clojure/tools.cli         {:mvn/version "1.1.230"}
            com.cleancoders.c3kit/apron   {:mvn/version "2.1.4"}
-           }
+           clj.native-image/clj.native-image
+           {:git/url "https://github.com/taylorwood/clj.native-image.git"
+            :sha     "7708e7fd4572459c81f6a6b8e44c96f41cdd92d4"}}
  :aliases {
            ;:build {:deps {io.github.clojure/tools.build {:git/tag "v0.10.3" :git/sha "15ead66"}}}
            :test {:extra-deps  {speclj/speclj {:mvn/version "3.4.8"}}

@@ -1,6 +1,7 @@
 (ns strucjure.build.build-native
   (:require [clojure.tools.build.api :as b]
             [strucjure.build.options :as opts]
+            [clj.native-image :as ni]
             [clojure.java.shell :as sh]))
 
 (def basis (delay (b/create-basis {:project "deps.edn"})))
@@ -25,11 +26,12 @@
 
   (println (str "Uber jar '" @opts/target ".jar' created.")))
 
-(defn native []
-  ; TODO: babashka?
-  (b/process {:command-args
+(defn native [main-ns args]
+  (ni/-main @opts/main-ns args)
+  #_(b/process {:command-args
               ["native-image" "--verbose" "--report-unsupported-elements-at-runtime"
-               "-march=compatibility" "--initialize-at-build-time" "--no-server" "-jar"
+               "-march=compatibility" "--initialize-at-build-time"
+               "--no-server" "-jar"
                (str @opts/target ".jar")
                (str "-H:Name=" @opts/target)] :inherit true}))
 
@@ -75,14 +77,17 @@
                  "strucjure-builder"]}))
   )
 
-(defn build [args]
-  (opts/set-options! args false)
-  (clean nil)
-  (aot-compile @opts/main-ns)
-  (native))
+(defn build [main-ns & args]
+  ;(opts/set-options! args false)
+  ;(clean nil)
+  ;(aot-compile @opts/main-ns)
+  (native main-ns args))
 
 (defn build-aarch64 [args]
   (opts/set-options! args true)
   (clean nil)
   (aot-compile @opts/main-ns)
   (docker))
+
+(defn -main [& args]
+  (apply ni/-main args))
