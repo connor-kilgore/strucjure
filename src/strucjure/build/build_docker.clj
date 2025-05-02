@@ -1,8 +1,5 @@
 (ns strucjure.build.build-docker
-  (:require [clojure.tools.build.api :as b]
-            [strucjure.build.options :as opts]
-            [clj.native-image :as ni]
-            [clojure.java.shell :as sh]))
+  (:require [clojure.tools.build.api :as b]))
 
 (defn write-dockerfile! [target]
   (spit "Dockerfile.aarch64"
@@ -21,8 +18,8 @@
          "chmod +x linux-install.sh && \\"
          "./linux-install.sh && \\"
          "rm linux-install.sh"
-         "CMD clojure -M:build-native"
-         (str "mv " target " /app/output/")]))))
+         "CMD clojure -M:build-native && \\"
+         (str "mv " target " /app/target/")]))))
 
 (defn docker [target]
   (let [cwd (System/getProperty "user.dir")]
@@ -31,14 +28,12 @@
     (println "Building Docker image")
     (b/process {:command-args
                 ["docker" "build"
-                 "--build-arg" (str "BUILD_TARGET=" @opts/target)
-                 "--build-arg" (str "MAIN_NS=" @opts/main-ns)
                  "-f" "Dockerfile.aarch64"
                  "-t" "strucjure-builder" "."]})
     (println "Running Docker container")
     (b/process {:command-args
                 ["docker" "run"
-                 "-v" (str cwd "/output:/app/output")
+                 "-v" (str cwd "/target:/app/target")
                  "strucjure-builder"]})))
 
 (defn -main [target]
